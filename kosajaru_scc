@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+void dfs1(int node, const vector<vector<int>>& adj, vector<bool>& visited, stack<int>& finishStack) {
+    visited[node] = true;
+    for (int neighbor : adj[node]) {
+        if (!visited[neighbor]) {
+            dfs1(neighbor, adj, visited, finishStack);
+        }
+    }
+    finishStack.push(node);
+}
+
+void dfs2(int node, const vector<vector<int>>& revAdj, vector<bool>& visited) {
+    visited[node] = true;
+    for (int neighbor : revAdj[node]) {
+        if (!visited[neighbor]) {
+            dfs2(neighbor, revAdj, visited);
+        }
+    }
+}
+
+int kosaraju(int n, const vector<vector<int>>& adj) {
+    vector<bool> visited(n + 1, false);
+    stack<int> finishStack;
+    
+    // Step 1: Perform DFS on the original graph to get the finishing times
+    for (int i = 1; i <= n; i++) {
+        if (!visited[i]) {
+            dfs1(i, adj, visited, finishStack);
+        }
+    }
+
+    // Step 2: Reverse the graph
+    vector<vector<int>> revAdj(n + 1);
+    for (int u = 1; u <= n; u++) {
+        for (int v : adj[u]) {
+            revAdj[v].push_back(u);
+        }
+    }
+
+    // Step 3: Perform DFS on the reversed graph in the order of finish times
+    fill(visited.begin(), visited.end(), false);
+    int sccCount = 0;
+    
+    while (!finishStack.empty()) {
+        int node = finishStack.top();
+        finishStack.pop();
+        
+        if (!visited[node]) {
+            sccCount++;
+            dfs2(node, revAdj, visited);
+        }
+    }
+    
+    return sccCount;
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<vector<int>> adj(n + 1);
+    
+    // Input the edges
+    for (int i = 0; i < m; i++) {
+        int a, b;
+        cin >> a >> b;
+        adj[a].push_back(b);
+    }
+    
+    // Find the number of SCCs (trust circles)
+    int result = kosaraju(n, adj);
+    
+    // Output the result
+    cout << result << endl;
+    
+    return 0;
+}
