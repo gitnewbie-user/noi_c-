@@ -1,0 +1,9 @@
+vector<int> prefixSum(vector<int>& arr) {
+    int n = arr.size();
+    vector<int> psa(n, 0);
+    psa[0] = arr[0];
+    for (int i = 1; i < n; i++) {
+        psa[i] = psa[i - 1] + arr[i];
+    }
+    return psa;
+}
